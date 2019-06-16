@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:vibration/vibration.dart';
 
 void main() => runApp(MyApp());
 
@@ -52,11 +53,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void changeTimerDuration(bool substract) {
+    int newDuration = substract
+        ? _currentSeconds - _minDuration
+        : _currentSeconds + _minDuration;
+
+    if (newDuration < _minDuration || newDuration > _maxDuration) {
+      if (Vibration.hasVibrator() != null) {
+        Vibration.vibrate(duration: 200);
+      }
+      return;
+    }
     setState(() {
-      int newTimer = substract
-          ? _currentSeconds - _minDuration
-          : _currentSeconds + _minDuration;
-      _currentSeconds = newTimer;
+      _currentSeconds = newDuration;
     });
   }
 
