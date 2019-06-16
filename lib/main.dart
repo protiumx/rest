@@ -23,14 +23,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final int _defaultTimer = 1 * 60; // 20 minutes
+  final int _defaultDuration = 1 * 60; // 20 minutes
   final int _minChange = 5 * 60; // adds or substracts 5 minutes
-  final int _maxTimer = 60 * 60; // one hour
+  final int _maxDuration = 60 * 60; // one hour
 
   // State
   int _currentSeconds;
   Timer _timer;
   bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentSeconds = _defaultDuration;
+  }
+
+  String parseTimeString(int total) {
+    int minutes = (total / 60).floor();
+    int seconds = total - minutes * 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
