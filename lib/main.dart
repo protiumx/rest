@@ -3,7 +3,7 @@ import 'dart:async';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {  
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,7 +23,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final int _defaultDuration = 1 * 60; // 20 minutes
+  final int _defaultDuration = 20 * 60; // 20 minutes
   final int _minDuration = 5 * 60; // adds or substracts 5 minutes
   final int _maxDuration = 60 * 60; // one hour
 
@@ -53,8 +53,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void changeTimerDuration(bool substract) {
     setState(() {
-      int newTimer = substract ? _currentSeconds - _minDuration : _currentSeconds + _minDuration;
+      int newTimer = substract
+          ? _currentSeconds - _minDuration
+          : _currentSeconds + _minDuration;
       _currentSeconds = newTimer;
+    });
+  }
+
+  void updateTimer() {
+    if (_currentSeconds == 1) {
+      _timer.cancel();
+      _currentSeconds = _defaultDuration;
+      _started = false;
+    } else {
+      _currentSeconds--;
+    }
+  }
+
+  void toggleTimer() {
+    setState(() {
+      const oneSecond = const Duration(seconds: 1);
+      if (!_started) {
+        _timer = new Timer.periodic(
+            oneSecond, (Timer timer) => setState(updateTimer));
+
+        _currentSeconds--;
+        _started = true;
+      } else {
+        _timer.cancel();
+        _started = false;
+        _currentSeconds = _defaultDuration;
+      }
     });
   }
 
@@ -108,8 +137,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             RaisedButton(
-              onPressed: null,
-              child: Text(_started ? 'stop' : 'start', style: TextStyle(fontSize: 30)),
+              onPressed: toggleTimer,
+              child: Text(_started ? 'stop' : 'start',
+                  style: TextStyle(fontSize: 30)),
             ),
           ],
         ),
