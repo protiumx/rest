@@ -23,7 +23,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final int _defaultDuration = 20 * 60; // 20 minutes
   final int _minDuration = 5 * 60; // adds or substracts 5 minutes
   final int _maxDuration = 60 * 60; // one hour
@@ -36,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _currentSeconds = _defaultDuration;
   }
 
@@ -43,6 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
     int minutes = (total / 60).floor();
     int seconds = total - minutes * 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.suspending) {
+      _timer?.cancel();
+    } else if (state == AppLifecycleState.resumed) {
+      // TODO: get current seconds from app service
+    }
   }
 
   @override
