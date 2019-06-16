@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() => runApp(MyApp());
 
@@ -25,6 +26,11 @@ class _MyHomePageState extends State<MyHomePage> {
   final int _defaultTimer = 1 * 60; // 20 minutes
   final int _minChange = 5 * 60; // adds or substracts 5 minutes
   final int _maxTimer = 60 * 60; // one hour
+
+  // State
+  int _currentSeconds;
+  Timer _timer;
+  bool _started = false;
 
   @override
   Widget build(BuildContext context) {
