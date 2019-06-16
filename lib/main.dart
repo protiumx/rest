@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:vibration/vibration.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -24,9 +25,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  final int _defaultDuration = 20 * 60; // 20 minutes
-  final int _minDuration = 5 * 60; // adds or substracts 5 minutes
-  final int _maxDuration = 60 * 60; // one hour
+  static const int _defaultDuration = 20 * 60; // 20 minutes
+  static const int _minDuration = 5 * 60; // adds or substracts 5 minutes
+  static const int _maxDuration = 60 * 60; // one hour
+
+  static const platform = const MethodChannel('dev.protium.rest/service');
 
   // State
   int _currentSeconds;
