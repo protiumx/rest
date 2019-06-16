@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _currentSeconds = _defaultDuration;
   }
 
-  String parseTimeString(int total) {
+  String formatTime(int total) {
     int minutes = (total / 60).floor();
     int seconds = total - minutes * 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
