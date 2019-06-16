@@ -24,7 +24,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final int _defaultDuration = 1 * 60; // 20 minutes
-  final int _minChange = 5 * 60; // adds or substracts 5 minutes
+  final int _minDuration = 5 * 60; // adds or substracts 5 minutes
   final int _maxDuration = 60 * 60; // one hour
 
   // State
@@ -51,6 +51,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  void changeTimerDuration(bool substract) {
+    setState(() {
+      int newTimer = substract ? _currentSeconds - _minDuration : _currentSeconds + _minDuration;
+      _currentSeconds = newTimer;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +67,51 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Visibility(
+                  visible: !_started,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: FloatingActionButton(
+                      backgroundColor: Colors.grey,
+                      onPressed:
+                          _started ? null : () => changeTimerDuration(true),
+                      tooltip: 'substract 5 min',
+                      child: Icon(
+                        Icons.remove,
+                        color: Colors.white,
+                      )),
+                ),
+                Text(
+                  _currentSeconds < 0 ? '' : formatTime(_currentSeconds),
+                  style: TextStyle(fontSize: 80),
+                ),
+                Visibility(
+                  visible: !_started,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: FloatingActionButton(
+                      backgroundColor: Colors.grey,
+                      onPressed:
+                          _started ? null : () => changeTimerDuration(false),
+                      tooltip: 'add 5 min',
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      )),
+                ),
+              ],
+            ),
+            RaisedButton(
+              onPressed: null,
+              child: Text(_started ? 'stop' : 'start', style: TextStyle(fontSize: 30)),
+            ),
+          ],
         ),
       ),
     );
