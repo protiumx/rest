@@ -1,5 +1,5 @@
-name: rest
-description: A new Flutter project.
+name: Rest
+description: Turn music off after a period of time and rest.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,6 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  vibration: 1.1.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
