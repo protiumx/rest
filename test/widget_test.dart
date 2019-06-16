@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rest/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+  group("HomeWidget", () {
+    testWidgets('Increments timer by 5 min', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(find.text('20:00'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      expect(find.text('25:00'), findsOneWidget);
+    });
+
+    testWidgets('Decrements timer by 5 min', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
+
+
+      expect(find.text('20:00'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.remove));
+      await tester.pump();
+
+      expect(find.text('15:00'), findsOneWidget);
+    });
+
+    testWidgets('Hide buttons after start timer', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.tap(find.text('start'));
+      await tester.pump();
+
+      var buttonPredicate = (Widget w) => w is Visibility && !w.visible;
+      expect(find.text('stop'), findsOneWidget);
+      expect(find.byWidgetPredicate(buttonPredicate), findsNWidgets(2));
+    });
   });
 }
