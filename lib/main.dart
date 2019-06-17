@@ -11,7 +11,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Rest',
       theme: ThemeData(primarySwatch: Colors.grey, brightness: Brightness.dark),
-      home: MyHomePage(title: 'Rest'),
+      home: Scaffold(
+        body: MyHomePage(title: 'Rest'),
+      ),
     );
   }
 }
@@ -35,12 +37,81 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   int _currentSeconds;
   Timer _timer;
   bool _started = false;
+  bool _connectedToService = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _currentSeconds = _defaultDuration;
+    connectToService();
+  }
+
+  Future connectToService() async {
+    try {
+      await platform.invokeMethod('connect');
+      print('Connected to service');
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: const Text('Connected to app service'), duration: const Duration(seconds: 2))
+      );
+    } on Exception catch(e) {
+      print(e.toString());
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: const Text('Could not connect to app service.'))
+      );
+      return;
+    }
+
+    try {
+      int serviceCurrentSeconds = await getServiceCurrentSeconds();
+      setState(() {
+        _connectedToService = true;
+        if (serviceCurrentSeconds <= 0) {
+          _currentSeconds = _defaultDuration;
+          _started = false;
+          _timer?.cancel();
+        } else {
+          _currentSeconds = serviceCurrentSeconds;
+          _started = true;
+          const oneSecond = const Duration(seconds: 1);
+          _timer = new Timer.periodic(
+              oneSecond, (Timer timer) => setState(updateTimer));
+        }
+      });
+    } on PlatformException catch(e) {
+      print(e.toString());
+    } on Exception catch(e) {
+      print(e.toString());
+    }
+  }
+
+  Future startService(int duration) async {
+    try {
+      await platform.invokeMethod('start', { 'duration': duration});
+    }  on PlatformException catch(e) {
+      debugPrint(e.toString());
+      throw e;
+    }
+  }
+
+  Future stopService() async {
+    try {
+      await platform.invokeMethod('stop');
+    }  on PlatformException catch(e) {
+      debugPrint(e.toString());
+      throw e;
+    }
+  }
+
+  Future getServiceCurrentSeconds() async {
+    try {
+      int result = await platform.invokeMethod('getCurrentSeconds');
+      return result;
+    } on PlatformException catch(e) {
+      print(e.toString());
+    }
+
+    return 0;
   }
 
   String formatTime(int total) {
@@ -55,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.suspending) {
       _timer?.cancel();
     } else if (state == AppLifecycleState.resumed) {
-      // TODO: get current seconds from app service
+      connectToService();
     }
   }
 
@@ -93,20 +164,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void toggleTimer() {
-    setState(() {
-      const oneSecond = const Duration(seconds: 1);
-      if (!_started) {
+    if (!_started) {
+      startService(_currentSeconds).then((_) => setState(() {
+        const oneSecond = const Duration(seconds: 1);
         _timer = new Timer.periodic(
-            oneSecond, (Timer timer) => setState(updateTimer));
+        oneSecond, (Timer timer) => setState(updateTimer));
 
         _currentSeconds--;
         _started = true;
-      } else {
-        _timer.cancel();
-        _started = false;
-        _currentSeconds = _defaultDuration;
-      }
-    });
+      }));
+    } else {
+     stopService().then((_) => setState(() {
+       _timer.cancel();
+       _started = false;
+       _currentSeconds = _defaultDuration;
+     }));
+    }
   }
 
   @override
@@ -159,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               ],
             ),
             RaisedButton(
-              onPressed: toggleTimer,
+              onPressed: _connectedToService ? toggleTimer : null,
               child: Text(_started ? 'stop' : 'start',
                   style: TextStyle(fontSize: 30)),
             ),
