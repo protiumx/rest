@@ -1,16 +1,38 @@
 # rest
 
-A new Flutter project.
+A simple app that will pause music after a period of time.
+This app was developed with Flutter
 
-## Getting Started
+## Install from Google Play
 
-This project is a starting point for a Flutter application.
+<a href="https://play.google.com/store/apps/details?id=dev.protium.rest">
+  <img alt="Get it on Google Play"
+       src="https://developer.android.com/images/brand/en_generic_rgb_wo_60.png" />
+</a>
 
-A few resources to get you started if this is your first Flutter project:
+## Development
+Dependencies:
+* Android SDK
+* Android Studio
+* Flutter SDK
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Check your dependencies with `flutter doctor` 
+## Testing
+```
+flutter test
+flutter drive --target=test_driver/home_page.dart 
+```
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## Running
+`flutter run`
+
+## Screenshots
+
+<img src="./images/screenshot1.png" width="300">
+
+<img src="./images/screenshot2.png" width="300">
+
+
+## TODOs
+* Add sticky notification
+* Show toast message when music is paused
