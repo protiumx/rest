@@ -4,7 +4,10 @@ import 'package:vibration/vibration.dart';
 import 'package:flutter/services.dart';
 
 Future<void> main() async {
-  await SystemChrome.setPreferredOrientations(<DeviceOrientation> [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown
+  ]);
   runApp(MyApp());
 }
 
@@ -22,19 +25,24 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key key, this.title, this.testMode = false}) : super(key: key);
   final String title;
+  final bool testMode;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState(testMode);
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+  _MyHomePageState(this.testMode);
+  final bool testMode;
+
   static const int _defaultDuration = 20 * 60; // 20 minutes
   static const int _minDuration = 5 * 60; // adds or substracts 5 minutes
   static const int _maxDuration = 60 * 60; // one hour
 
-  static const MethodChannel platform = MethodChannel('dev.protium.rest/service');
+  static const MethodChannel platform =
+      MethodChannel('dev.protium.rest/service');
 
   // State
   int _currentSeconds;
@@ -45,23 +53,27 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _currentSeconds = _defaultDuration;
-    connectToService();
+
+    if (!testMode) {
+      WidgetsBinding.instance.addObserver(this);
+      connectToService();
+    } else {
+      _connectedToService = true;
+    }
   }
 
   Future<void> connectToService() async {
     try {
       await platform.invokeMethod<void>('connect');
       print('Connected to service');
-      Scaffold.of(context).showSnackBar(
-          const SnackBar(content: Text('Connected to app service'), duration: Duration(seconds: 2))
-      );
-    } on Exception catch(e) {
+      Scaffold.of(context).showSnackBar(const SnackBar(
+          content: Text('Connected to app service'),
+          duration: Duration(seconds: 2)));
+    } on Exception catch (e) {
       print(e.toString());
       Scaffold.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not connect to app service.'))
-      );
+          const SnackBar(content: Text('Could not connect to app service.')));
       return;
     }
 
@@ -77,30 +89,39 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           _currentSeconds = serviceCurrentSeconds;
           _started = true;
           const Duration oneSecond = Duration(seconds: 1);
-          _timer = Timer.periodic(
-              oneSecond, (Timer timer) => setState(updateTimer));
+          _timer =
+              Timer.periodic(oneSecond, (Timer timer) => setState(updateTimer));
         }
       });
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       print(e.toString());
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       print(e.toString());
     }
   }
 
-  Future<void> startService(int duration) async {
+  Future<void> startServiceTimer(int duration) async {
+    if (testMode) {
+      return;
+    }
+
     try {
-      await platform.invokeMethod<void>('start', <String, int> { 'duration': duration});
-    }  on PlatformException catch(e) {
+      await platform
+          .invokeMethod<void>('start', <String, int>{'duration': duration});
+    } on PlatformException catch (e) {
       debugPrint(e.toString());
       rethrow;
     }
   }
 
-  Future<void> stopService() async {
+  Future<void> stopServiceTimer() async {
+    if (testMode) {
+      return;
+    }
+
     try {
       await platform.invokeMethod<void>('stop');
-    }  on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       debugPrint(e.toString());
       rethrow;
     }
@@ -110,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     try {
       final int result = await platform.invokeMethod<int>('getCurrentSeconds');
       return result;
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       print(e.toString());
     }
 
@@ -126,7 +147,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.suspending) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.suspending) {
       _timer?.cancel();
     } else if (state == AppLifecycleState.resumed) {
       connectToService();
@@ -168,20 +190,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void toggleTimer() {
     if (!_started) {
-      startService(_currentSeconds).then((void _) => setState(() {
-        const Duration oneSecond = Duration(seconds: 1);
-        _timer = Timer.periodic(
-        oneSecond, (Timer timer) => setState(updateTimer));
+      startServiceTimer(_currentSeconds).then((void _) => setState(() {
+            const Duration oneSecond = Duration(seconds: 1);
+            _timer = Timer.periodic(
+                oneSecond, (Timer timer) => setState(updateTimer));
 
-        _currentSeconds--;
-        _started = true;
-      }));
+            _currentSeconds--;
+            _started = true;
+          }));
     } else {
-     stopService().then((void _) => setState(() {
-       _timer.cancel();
-       _started = false;
-       _currentSeconds = _defaultDuration;
-     }));
+      stopServiceTimer().then((void _) => setState(() {
+            _timer.cancel();
+            _started = false;
+            _currentSeconds = _defaultDuration;
+          }));
     }
   }
 
