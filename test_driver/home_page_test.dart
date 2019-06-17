@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
@@ -7,8 +8,13 @@ void main() {
     FlutterDriver driver;
 
     setUpAll(() async {
+      final Map<String, String> envVars = Platform.environment;
+      final String adbPath = envVars['ANDROID_HOME'] + '/platform-tools/adb';
+      await Process.run(adbPath , <String>['shell' ,'pm', 'grant', 'dev.protium.rest', 'android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS']);
       driver = await FlutterDriver.connect();
     });
+
+    
 
     tearDownAll(() async {
       if (driver != null) {
@@ -17,8 +23,6 @@ void main() {
     });
 
     test('Start and stop timer', () async {
-      // Give time to acept permission
-      await Future<void>.delayed(Duration(seconds: 5));
       await driver.tap(find.text('start'));
       await driver.waitFor(find.text('stop'));
       await Future<void>.delayed(Duration(seconds: 5));
