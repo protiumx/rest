@@ -8,10 +8,12 @@ void main() {
     FlutterDriver driver;
 
     setUpAll(() async {
+      // commands are note working properly
       final Map<String, String> envVars = Platform.environment;
       final String adbPath = envVars['ANDROID_HOME'] + '/platform-tools/adb';
       await Process.run(adbPath , <String>['shell' ,'pm', 'grant', 'dev.protium.rest', 'android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS']);
       await Process.run(adbPath , <String>['shell' ,'pm', 'grant', 'dev.protium.rest', 'android.permission.VIBRATE']);
+      await Process.run(adbPath , <String>['shell dumpsys deviceidle whitelist +dev.protium.rest']);
       driver = await FlutterDriver.connect();
     });
 
