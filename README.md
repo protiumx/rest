@@ -36,3 +36,9 @@ flutter drive --target=test_driver/home_page.dart
 ## TODOs
 * Add sticky notification
 * Show toast message when music is paused
+
+## Donate
+If you liked this app feel free to buy me a coffee
+<a href="https://www.buymeacoffee.com/p3kqm9Z2h" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
+© Brian Mayo - 2019
