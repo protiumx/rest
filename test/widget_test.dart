@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rest/main.dart';
 
 void main() {
-  group("HomeWidget", () {
+  group('HomeWidget', () {
     testWidgets('Increments timer by 5 min', (WidgetTester tester) async {
       await tester.pumpWidget(MyApp());
 
@@ -33,7 +33,7 @@ void main() {
       await tester.tap(find.text('start'));
       await tester.pump();
 
-      var buttonPredicate = (Widget w) => w is Visibility && !w.visible;
+      final bool Function(Widget w) buttonPredicate = (Widget w) => w is Visibility && !w.visible;
       expect(find.text('stop'), findsOneWidget);
       expect(find.byWidgetPredicate(buttonPredicate), findsNWidgets(2));
     });

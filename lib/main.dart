@@ -1,9 +1,12 @@
+import 'dart:async' show Future, Timer;
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:vibration/vibration.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
+Future<void> main() async {
+  await SystemChrome.setPreferredOrientations(<DeviceOrientation> [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -31,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   static const int _minDuration = 5 * 60; // adds or substracts 5 minutes
   static const int _maxDuration = 60 * 60; // one hour
 
-  static const platform = const MethodChannel('dev.protium.rest/service');
+  static const MethodChannel platform = MethodChannel('dev.protium.rest/service');
 
   // State
   int _currentSeconds;
@@ -47,23 +50,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     connectToService();
   }
 
-  Future connectToService() async {
+  Future<void> connectToService() async {
     try {
-      await platform.invokeMethod('connect');
+      await platform.invokeMethod<void>('connect');
       print('Connected to service');
       Scaffold.of(context).showSnackBar(
-          SnackBar(content: const Text('Connected to app service'), duration: const Duration(seconds: 2))
+          const SnackBar(content: Text('Connected to app service'), duration: Duration(seconds: 2))
       );
     } on Exception catch(e) {
       print(e.toString());
       Scaffold.of(context).showSnackBar(
-          SnackBar(content: const Text('Could not connect to app service.'))
+          const SnackBar(content: Text('Could not connect to app service.'))
       );
       return;
     }
 
     try {
-      int serviceCurrentSeconds = await getServiceCurrentSeconds();
+      final int serviceCurrentSeconds = await getServiceCurrentSeconds();
       setState(() {
         _connectedToService = true;
         if (serviceCurrentSeconds <= 0) {
@@ -73,8 +76,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         } else {
           _currentSeconds = serviceCurrentSeconds;
           _started = true;
-          const oneSecond = const Duration(seconds: 1);
-          _timer = new Timer.periodic(
+          const Duration oneSecond = Duration(seconds: 1);
+          _timer = Timer.periodic(
               oneSecond, (Timer timer) => setState(updateTimer));
         }
       });
@@ -85,27 +88,27 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
-  Future startService(int duration) async {
+  Future<void> startService(int duration) async {
     try {
-      await platform.invokeMethod('start', { 'duration': duration});
+      await platform.invokeMethod<void>('start', <String, int> { 'duration': duration});
     }  on PlatformException catch(e) {
       debugPrint(e.toString());
-      throw e;
+      rethrow;
     }
   }
 
-  Future stopService() async {
+  Future<void> stopService() async {
     try {
-      await platform.invokeMethod('stop');
+      await platform.invokeMethod<void>('stop');
     }  on PlatformException catch(e) {
       debugPrint(e.toString());
-      throw e;
+      rethrow;
     }
   }
 
-  Future getServiceCurrentSeconds() async {
+  Future<int> getServiceCurrentSeconds() async {
     try {
-      int result = await platform.invokeMethod('getCurrentSeconds');
+      final int result = await platform.invokeMethod<int>('getCurrentSeconds');
       return result;
     } on PlatformException catch(e) {
       print(e.toString());
@@ -115,8 +118,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   String formatTime(int total) {
-    int minutes = (total / 60).floor();
-    int seconds = total - minutes * 60;
+    final int minutes = (total / 60).floor();
+    final int seconds = total - minutes * 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
@@ -138,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void changeTimerDuration(bool substract) {
-    int newDuration = substract
+    final int newDuration = substract
         ? _currentSeconds - _minDuration
         : _currentSeconds + _minDuration;
 
@@ -165,16 +168,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void toggleTimer() {
     if (!_started) {
-      startService(_currentSeconds).then((_) => setState(() {
-        const oneSecond = const Duration(seconds: 1);
-        _timer = new Timer.periodic(
+      startService(_currentSeconds).then((void _) => setState(() {
+        const Duration oneSecond = Duration(seconds: 1);
+        _timer = Timer.periodic(
         oneSecond, (Timer timer) => setState(updateTimer));
 
         _currentSeconds--;
         _started = true;
       }));
     } else {
-     stopService().then((_) => setState(() {
+     stopService().then((void _) => setState(() {
        _timer.cancel();
        _started = false;
        _currentSeconds = _defaultDuration;
@@ -205,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       onPressed:
                           _started ? null : () => changeTimerDuration(true),
                       tooltip: 'substract 5 min',
-                      child: Icon(
+                      child: const Icon(
                         Icons.remove,
                         color: Colors.white,
                       )),
@@ -224,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       onPressed:
                           _started ? null : () => changeTimerDuration(false),
                       tooltip: 'add 5 min',
-                      child: Icon(
+                      child: const Icon(
                         Icons.add,
                         color: Colors.white,
                       )),
