@@ -11,6 +11,7 @@ void main() {
       final Map<String, String> envVars = Platform.environment;
       final String adbPath = envVars['ANDROID_HOME'] + '/platform-tools/adb';
       await Process.run(adbPath , <String>['shell' ,'pm', 'grant', 'dev.protium.rest', 'android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS']);
+      await Process.run(adbPath , <String>['shell' ,'pm', 'grant', 'dev.protium.rest', 'android.permission.VIBRATE']);
       driver = await FlutterDriver.connect();
     });
 
