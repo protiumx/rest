@@ -20,17 +20,17 @@ public class AppService extends Service {
 
     @Override
     public void onCreate() {
-        super.onCreate();        
-        _timer = new Timer();
+        super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
         _timer.cancel();
         super.onDestroy();
     }
@@ -48,7 +48,7 @@ public class AppService extends Service {
 
     public void startTimer(int duration) {
         _currentSeconds = duration - 1;
-
+        _timer = new Timer();
         _timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -81,10 +81,12 @@ public class AppService extends Service {
 
     public void stopTimer() {
         _timer.cancel();
+        _timer = null;
+        _currentSeconds = 0;
         Log.i(TAG, "Timer stopped");
     }
 
-    public int getRemainingTime() {
+    public int getCurrentSeconds() {
         return _currentSeconds;
     }
 }
