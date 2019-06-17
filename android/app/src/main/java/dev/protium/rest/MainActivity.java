@@ -4,37 +4,54 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import io.flutter.plugin.common.MethodChannel;
 
 public class MainActivity extends FlutterActivity {
   static final String TAG = "rest";
-
+  static final String CHANNEL = "dev.protium.rest/service";
 
   AppService appService;
-  boolean serviceBounded = false;
+  boolean serviceConnected = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     GeneratedPluginRegistrant.registerWith(this);
+
+    new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(
+            (call, result) -> {
+              if (!serviceConnected) {
+                result.error(null, "Service not connected", null);
+                return;
+              }
+
+              try {
+                if (call.method.equals("start")) {
+                  appService.startTimer(call.argument("duration"));
+                  result.success(null);
+                } else if (call.method.equals("stop")){
+                  appService.stopTimer();
+                  result.success(null);
+                } else if (call.method.equals("getRemainingTime")) {
+                  result.success(appService.getRemainingTime());
+                }
+              } catch (Exception e) {
+                result.error(null, e.getMessage(), null);
+              }
+            });
   }
 
   @Override
   protected void onStart() {
     super.onStart();
 
-    if (!serviceBounded) {
+    if (!serviceConnected) {
       Intent intent = new Intent(this, AppService.class);
       bindService(intent, connection, Context.BIND_AUTO_CREATE);
     } else {
@@ -46,7 +63,7 @@ public class MainActivity extends FlutterActivity {
   protected void onStop() {
     super.onStop();
     unbindService(connection);
-    serviceBounded = false;
+    serviceConnected = false;
   }
 
   private ServiceConnection connection = new ServiceConnection() {
@@ -56,13 +73,13 @@ public class MainActivity extends FlutterActivity {
                                    IBinder service) {
       AppService.AppServiceBinder binder = (AppService.AppServiceBinder)service;
       appService = binder.getService();
-      serviceBounded = true;
+      serviceConnected = true;
       Log.i(TAG, "Service connected");
     }
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
-      serviceBounded = false;
+      serviceConnected = false;
       Log.i(TAG, "service disconnected");
     }
   };
