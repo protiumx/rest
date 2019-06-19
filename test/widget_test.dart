@@ -5,7 +5,7 @@ import 'package:rest/main.dart';
 
 void main() {
   group('HomeWidget', () {
-    testWidgets('Increments timer by 5 min', (WidgetTester tester) async {
+    testWidgets('Increases time by 5 minutes', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: MyHomePage(title: 'Rest', testMode: true,),
@@ -20,7 +20,7 @@ void main() {
       expect(find.text('25:00'), findsOneWidget);
     });
 
-    testWidgets('Decrements timer by 5 min', (WidgetTester tester) async {
+    testWidgets('Decreases time by 5 minutes', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: MyHomePage(title: 'Rest', testMode: true,),
