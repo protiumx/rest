@@ -1,5 +1,7 @@
 # rest
 
+**NOTICE:** This repo is not being maintained.
+
 A simple app that will pause music after a period of time.
 This app was developed with Flutter
 
